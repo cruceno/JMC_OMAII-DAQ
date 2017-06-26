@@ -102,3 +102,6 @@ ENV/
 
 # Eclipse settings folder 
 .settings/
+/src/
+/OMAIII/
+/05- 02.09.13/
