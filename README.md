@@ -1,4 +1,4 @@
-# JMC_OMAII-DAQ
+# JMC PyOMA
 
 ## Objetivos:
 
@@ -11,5 +11,6 @@
 	- Python 3.5 
 	- PySerial
 	- PyQt4
+	- ConfigObj
 	
  
