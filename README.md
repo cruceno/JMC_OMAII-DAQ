@@ -6,7 +6,7 @@
 	- Generar archivos de salida.  
 	- Permitir la visualización de los datos de forma inmediata
 	
-## Lenguaje y librerias utilizadas
+## Lenguaje y librerias
 
 	- Python 3.5 
 	- PySerial
