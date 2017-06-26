@@ -1,5 +1,5 @@
 .. PyOma documentation master file, created by
-   sphinx-quickstart on Mon Jun 26 18:45:21 2017.
+   sphinx-quickstart on Mon Jun 26 18:56:43 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
