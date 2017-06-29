@@ -1,18 +1,7 @@
-.. PyOma documentation master file, created by
-   sphinx-quickstart on Mon Jun 26 18:56:43 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Bienvenido a la documentacion de PyOma
-=================================================================
-Breve Introducción
+Breve introduccion  
 ------------------
-Pyoma es una aplicación destinada al control del ST-1461 de Princeton Instruments (OMAIII). 
- 
-Actuamente e encuentra en desarrollo lo que sera la versión final de la misma. Estan en uso en el ambito del laboratorio 
-de Física del Plasma del Instituto de Física Rosario, versiones beta que cumplen funciones minimas con algunos "bugs". 
 
-El modelo *ST-1461 de Princeton Instrument* es un dispositivo de escritorio diseñado para adquirir datos desde un 
+El modelo ST-1461 de Princeton Instrument es un dispositivo de escritorio diseñado para adquirir datos desde un 
 detector de luz. Los datos son almacenados en la memoria interna del equipo y pueden ser capturados por una computadora externa.
 Bajo instrucciones del usuario la computadora no solo accede a los datos en el dispositivo sin no que también controla todo el 
 proceso de adquisición. 
@@ -27,18 +16,9 @@ Debido a que el dispositivo es de los años 80' no se cuenta con un software de 
 sistemas informáticos modernos. Para poder afrontar este inconveniente se decide desarrolar una aplicación que permita la operacion
 básica del equipo a traves de su interface de comunicación RS232.
 
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   
-   intro
-   screenshots
-   use
-	
 
-Indices and tables
-==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
+
+
+

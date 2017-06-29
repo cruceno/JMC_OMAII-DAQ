@@ -1,0 +1,2 @@
+Capturas de pantalla
+--------------------
