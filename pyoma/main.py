@@ -25,6 +25,7 @@ from pyoma.instrument.oma import spectrum
 from pyoma.worker.scan import Scanner
 from pyoma.instrument.serialutil import scan_serial_ports
 
+
 class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
     """La ventana principal de la aplicacion."""
 
@@ -38,8 +39,9 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         self.splash.setTitle('OMAIII DAQ')
         self.splash.show()
         self.splash.connect(self,
-                   QtCore.SIGNAL('splashUpdate(QString, int)'),
-                   self.splash.showMessage)
+                            QtCore.SIGNAL('splashUpdate(QString, int)'),
+                            self.splash.showMessage
+                            )
         self.setupUi(self)
         # Cargamos archivo de configuracion predeterminado
         # Estudiar caso en que el archivo de configuracion no exista
@@ -83,7 +85,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         self.emit(QtCore.SIGNAL("splashUpdate(QString, int)"),
                   'Loading conected devices . . .',
                   132)
-        
+
         # Obtener listado de puertos serie presentes en el equipo
         ports = scan_serial_ports(30, False)
         self.set_ui_serial_controls(ports)
@@ -143,7 +145,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
                   132)
         monochromatorConfig = self.config['monochromatorConfig']
         self.daq_sp_monochromator_counter.setValue(int(monochromatorConfig['counter']))
-        index=self.daq_cbx_monochromator_grating.findData(monochromatorConfig['selected_grating'])
+        index = self.daq_cbx_monochromator_grating.findData(monochromatorConfig['selected_grating'])
         self.daq_cbx_monochromator_grating.setCurrentIndex(index)
         self.le_monochromator_g1_lines.setText(monochromatorConfig['g1']['lines'])
         self.le_monochromator_g1_amplitude.setText(monochromatorConfig['g1']['amplitude'])
@@ -159,47 +161,59 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         self.le_monochromator_g3_amplitude.setText(monochromatorConfig['g3']['amplitude'])
         self.le_monochromator_g3_resolution.setText(monochromatorConfig['g3']['resolution'])
         self.dsb_monochromator_g3_factor.setValue(float(monochromatorConfig['g3']['factor']))
-    
+
     @QtCore.pyqtSlot()
     def on_daq_sp_monochromator_counter_valueChanged(self):
-        self.config['monochromatorConfig']['counter']=self.daq_sp_monochromator_counter.value()
+        self.config['monochromatorConfig']['counter'] = self.daq_sp_monochromator_counter.value()
+
     @QtCore.pyqtSlot()
     def on_le_monochromator_g1_lines_editingFinished(self):
-        self.config['monochromatorConfig']['g1']['lines']=self.le_monochromator_g1_lines.text()
+        self.config['monochromatorConfig']['g1']['lines'] = self.le_monochromator_g1_lines.text()
+
     @QtCore.pyqtSlot()
     def on_le_monochromator_g1_amplitude_editingFinished(self):
-        self.config['monochromatorConfig']['g1']['amplitude']=self.le_monochromator_g1_amplitude.text()
+        self.config['monochromatorConfig']['g1']['amplitude'] = self.le_monochromator_g1_amplitude.text()
+
     @QtCore.pyqtSlot()
     def on_le_monochromator_g1_resolution_editingFinished(self):
-        self.config['monochromatorConfig']['g1']['resolution']=self.le_monochromator_g1_resolution.text()
+        self.config['monochromatorConfig']['g1']['resolution'] = self.le_monochromator_g1_resolution.text()
+
     @QtCore.pyqtSlot()
     def on_dsb_monochromator_g1_factor_valueChanged(self):
-        self.config['monochromatorConfig']['g1']['factor']=self.dsb_monochromator_g1_factor.value()
+        self.config['monochromatorConfig']['g1']['factor'] = self.dsb_monochromator_g1_factor.value()
+
     @QtCore.pyqtSlot()
     def on_le_monochromator_g2_lines_editingFinished(self):
-        self.config['monochromatorConfig']['g2']['lines']=self.le_monochromator_g2_lines.text()
+        self.config['monochromatorConfig']['g2']['lines'] = self.le_monochromator_g2_lines.text()
+
     @QtCore.pyqtSlot()
     def on_le_monochromator_g2_amplitude_editingFinished(self):
-        self.config['monochromatorConfig']['g2']['amplitude']=self.le_monochromator_g2_amplitude.text()
+        self.config['monochromatorConfig']['g2']['amplitude'] = self.le_monochromator_g2_amplitude.text()
+
     @QtCore.pyqtSlot()
     def on_le_monochromator_g2_resolution_editingFinished(self):
-        self.config['monochromatorConfig']['g2']['resolution']=self.le_monochromator_g2_resolution.text()
+        self.config['monochromatorConfig']['g2']['resolution'] = self.le_monochromator_g2_resolution.text()
+
     @QtCore.pyqtSlot()
     def on_dsb_monochromator_g2_factor_valueChanged(self):
-        self.config['monochromatorConfig']['g2']['factor']=self.dsb_monochromator_g2_factor.value()
+        self.config['monochromatorConfig']['g2']['factor'] = self.dsb_monochromator_g2_factor.value()
+
     @QtCore.pyqtSlot()
     def on_le_monochromator_g3_lines_editingFinished(self):
-        self.config['monochromatorConfig']['g3']['lines']=self.le_monochromator_g3_lines.text()
+        self.config['monochromatorConfig']['g3']['lines'] = self.le_monochromator_g3_lines.text()
+
     @QtCore.pyqtSlot()
     def on_le_monochromator_g3_amplitude_editingFinished(self):
-        self.config['monochromatorConfig']['g3']['amplitude']=self.le_monochromator_g3_amplitude.text()
+        self.config['monochromatorConfig']['g3']['amplitude'] = self.le_monochromator_g3_amplitude.text()
+
     @QtCore.pyqtSlot()
     def on_le_monochromator_g3_resolution_editingFinished(self):
-        self.config['monochromatorConfig']['g3']['resolution']=self.le_monochromator_g3_resolution.text()
+        self.config['monochromatorConfig']['g3']['resolution'] = self.le_monochromator_g3_resolution.text()
+
     @QtCore.pyqtSlot()
     def on_dsb_monochromator_g3_factor_valueChanged(self):
-        self.config['monochromatorConfig']['g3']['factor']=self.dsb_monochromator_g3_factor.value() 
-          
+        self.config['monochromatorConfig']['g3']['factor'] = self.dsb_monochromator_g3_factor.value()
+
     def set_ui_serial_controls(self, ports=[]):
 
         ''' Esta funcion es la encargada de autocompletar la informacion necesaria
@@ -248,13 +262,13 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         for bytesize in SerialBase.BYTESIZES:
             # Agregar configuraciones disponibles al campo de seleccion
             self.cbx_serial_bytesizes.addItem(str(bytesize), bytesize)
-            
+
     def Plotear(self, canvas):
-        y=self.espectro.getSpec()
+        y = self.espectro.getSpec()
         canvas.axes.set_ylim(np.min(y) - np.min(y) * 20 / 100, np.max(y) + np.max(y) * 20 / 100)
         canvas.plotoma(self.espectro)
         self.statusBar().showMessage('Ploting...')
-        
+
     @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
         self.espectro.toOmaFile(self.config['workspace'],
@@ -277,19 +291,19 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
     @QtCore.pyqtSlot()
     def on_cbx_serial_parities_currentIndexChanged(self):
         parity = self.cbx_serial_parities.itemData(self.cbx_serial_parities_currentIndex())
-        self.config['serialConfig']['parity']=parity
+        self.config['serialConfig']['parity'] = parity
         self.ser.parity(parity)
 
     @QtCore.pyqtSlot()
     def on_cbx_serial_bytesizes_currentIndexChanged(self):
         bytesize = self.cbx_serial_bytesizes.itemData(self.cbx_serial_bytesizes_currentIndex())
-        self.config['serialConfig']['bytesize']=bytesize
+        self.config['serialConfig']['bytesize'] = bytesize
         self.ser.bytesize(bytesize)
 
     @QtCore.pyqtSlot()
     def on_cbx_serial_stopbits_currentIndexChanged(self):
-        stopbits=self.cbx_serial_stopbits.itemData(self.cbx_serial_stopbits_currentIndex())
-        self.config['serialConfig']['stopbits']=stopbits
+        stopbits = self.cbx_serial_stopbits.itemData(self.cbx_serial_stopbits_currentIndex())
+        self.config['serialConfig']['stopbits'] = stopbits
         self.ser.stopbits(stopbits)
 
     @QtCore.pyqtSlot()
@@ -333,10 +347,10 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         else:
             workdir = os.path.expanduser('~')
         fname = QtGui.QFileDialog.getSaveFileName(parent=self,
-                                   caption='Select File Basename',
-                                   directory=workdir,
-                                   filter="OMA Files(*.oma)"
-                                   )
+                                                  caption='Select File Basename',
+                                                  directory=workdir,
+                                                  filter="OMA Files(*.oma)"
+                                                  )
         if fname:
             self.le_basename.setText(fname)
 
@@ -348,9 +362,9 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         else:
             workdir = os.path.expanduser('~')
         self.le_bkg.setText(QtGui.QFileDialog.getOpenFileName(self,
-                                            directory=workdir,
-                                            caption='Open Background File',
-                                            filter="OMA Files(*.oma)")
+                                                              directory=workdir,
+                                                              caption='Open Background File',
+                                                              filter="OMA Files(*.oma)")
                             )
 
     def disable_controls(self):
@@ -365,28 +379,28 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
 
     @QtCore.pyqtSlot()
     def incoming_data(self, espectro):
-        
+
         if self.rb_background.checkState():
-            spec_type='bkg'
+            spec_type = 'bkg'
         else:
-            spec_type='spec'
-            
-        fname = self.le_basename.text()+time.strftime('%Y%m%d%H%M%S')
-        selected_grating=self.daq_cbx_monochromator_grating.itemData(self.daq_cbx_monochromator_grating.currentIndex())
-        self.espectro.fname=fname
-        self.espectro = spectrum( y=espectro,
-                                  fname=fname,
-                                  time=time.strftime('%c'),
-                                  exptime=self.le_exposuretime.text(),
-                                  damode=self.le_damode.text(),
-                                  dtemp=self.le_detectortemp.text(),
-                                  snumber=self.le_scansnumber.text(),
-                                  iscans=self.le_ignoredscans.text(),
-                                  monochromator_model='Jarrel Ash',
-                                  grating_info=self.config['monochromatorConfi'][selected_grating],
-                                  monochromator_counter=self.config['monochromatorConfig']['counter'],
-                                  spec_type=spec_type,
-                                  )
+            spec_type = 'spec'
+
+        fname = self.le_basename.text() + time.strftime('%Y%m%d%H%M%S')
+        selected_grating = self.daq_cbx_monochromator_grating.itemData(self.daq_cbx_monochromator_grating.currentIndex())
+        self.espectro.fname = fname
+        self.espectro = spectrum(y=espectro,
+                                 fname=fname,
+                                 time=time.strftime('%c'),
+                                 exptime=self.le_exposuretime.text(),
+                                 damode=self.le_damode.text(),
+                                 dtemp=self.le_detectortemp.text(),
+                                 snumber=self.le_scansnumber.text(),
+                                 iscans=self.le_ignoredscans.text(),
+                                 monochromator_model='Jarrel Ash',
+                                 grating_info=self.config['monochromatorConfi'][selected_grating],
+                                 monochromator_counter=self.config['monochromatorConfig']['counter'],
+                                 spec_type=spec_type
+                                 )
 
         if self.espectro.spec_type == 'spec':
             if self.le_bkg.text() == '':
@@ -402,19 +416,19 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
                                                                       )
                                     )
             bkg_path = str(self.le_bkg.text())
-            
+
             if os.path.isfile(bkg_path):
                 self.espectro.setBackground(bkg_path)
-                
+
             if self.chk_autosave.checkState():
                 self.espectro.toOmaFile(self.config['workspace'],
                                         self.config['fileFormat']['column_sep'],
                                         comments=self.config['fileFormat']['comment_char'],
                                         )
                 self.on_btn_check_clicked()
-            
+
             self.Plotear(self.espectro.y, self.daq_maincanvas)
-            
+
     @QtCore.pyqtSlot()
     def on_btn_stop_clicked(self):
         """Abortar Scan"""
@@ -451,9 +465,9 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         """Update Scan Sequence Settings"""
         self.ser.close()
         self.ser.open()
-        
+
         ET = 'ET ' + self.le_exposuretime.text() + '\r\n'
-        self.config['scanSettings']['exposuretime']=ET
+        self.config['scanSettings']['exposuretime'] = ET
         self.ser.write(ET)
 
         if self.ser.read() == '*':
@@ -472,9 +486,9 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
 
         if self.ser.read() == '*':
             pass
-        
+
         I = 'I ' + self.le_scansnumber.text() + '\r\n'
-        self.config['scanSettings']['scannumber']=I
+        self.config['scanSettings']['scannumber'] = I
 
         self.ser.write(I)
 
@@ -482,7 +496,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             pass
 
         K = 'K ' + self.le_ignoredscans.text() + '\r\n'
-        self.config['scanSettings']['ignoredscans']=K
+        self.config['scanSettings']['ignoredscans'] = K
         self.ser.write(K)
 
         if self.ser.read() == '*':
@@ -493,52 +507,52 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
 
     @QtCore.pyqtSlot()
     def on_btn_sustractbkg_pressed(self):
-        self.daq_maincanvas.plotoma(self.espectro, substract_bkg=True )
-    
-    @QtCore.pyqtSlot() 
+        self.daq_maincanvas.plotoma(self.espectro, substract_bkg=True)
+
+    @QtCore.pyqtSlot()
     def on_save_project_pressed(self):
-        workdir=os.path.expanduser('~')
+        workdir = os.path.expanduser('~')
         dirname = QtGui.QFileDialog.getExistingDirectory(self,
                                                          'Select Project Folder',
                                                          workdir,
                                                          QtGui.QFileDialog.ShowDirsOnly
                                                          )
         if os.path.isdir(dirname):
-            fname=dirname+'/.omaproject'
-            self.config['workspace']=dirname
-            self.config.filename=fname
+            fname = dirname + '/.omaproject'
+            self.config['workspace'] = dirname
+            self.config.filename = fname
             self.config.write()
             self.config.reload()
-            self.maintabs.setTabEnabled(1,True)
-            self.maintabs.setTabEnabled(2,True)
-        
+            self.maintabs.setTabEnabled(1, True)
+            self.maintabs.setTabEnabled(2, True)
+
         else:
-            message="Please select a valid omaproject directory"
+            message = "Please select a valid omaproject directory"
             self.change_messagge(message)
-            self.maintabs.setTabEnabled(1,False)
-            self.maintabs.setTabEnabled(2,False)
-            
-    @QtCore.pyqtSlot()        
+            self.maintabs.setTabEnabled(1, False)
+            self.maintabs.setTabEnabled(2, False)
+
+    @QtCore.pyqtSlot()
     def on_load_project_pressed(self):
-        workdir=os.path.expanduser('~')
+        workdir = os.path.expanduser('~')
         dirname = QtGui.QFileDialog.getExistingDirectory(self,
                                                          'Select Project Folder',
                                                          workdir,
                                                          QtGui.QFileDialog.ShowDirsOnly
                                                          )
-        fname=dirname+'/.omaproject'
+        fname = dirname + '/.omaproject'
         if os.path.isfile(fname):
-            self.config.filename=fname
+            self.config.filename = fname
             self.config.reload()
-            self.maintabs.setTabEnabled(1,True)
-            self.maintabs.setTabEnabled(2,True)
-            
+            self.maintabs.setTabEnabled(1, True)
+            self.maintabs.setTabEnabled(2, True)
+
         else:
-            message="Please select a valid omaproject directory"
+            message = "Please select a valid omaproject directory"
             self.change_messagge(message)
-            self.maintabs.setTabEnabled(1,False)
-            self.maintabs.setTabEnabled(2,False)
-                       
+            self.maintabs.setTabEnabled(1, False)
+            self.maintabs.setTabEnabled(2, False)
+
     def get_status(self):
         """Obtener configuracion y estado del OMA"""
         self.ser.close()
