@@ -5,7 +5,7 @@ Created on 1 jun. 2017
 '''
 from PyQt4.QtCore import QThread, SIGNAL
 from numpy import fromstring
-
+import time
 
 class Scanner(QThread):
 
@@ -29,21 +29,21 @@ class Scanner(QThread):
             # Abrir concexion de serie y enviamos el comando "RUN\r\n" que inicia el proceso de scan
             self.ser.close()
             self.ser.open()
-            self.ser.write('RUN\r\n')
+            self.ser.write(b'RUN\r\n')
             # emitimos un mensaje que diga en que parte del proceso de scan nos encontramos
             self.message = 'OMA Running...'
-            while self.ser.read() != '*':
-                self.emit(SIGNAL("msgsignal(Qstring)"), self.message)
+            self.emit(SIGNAL("msgsignal(PyQt_PyObject)"), self.message)
+            time.sleep(0.2)
+            while self.ser.read() != b'*':
                 continue
             # escribimos el comando que indica al oma que debe transferirnos los datos del espectro
-            self.ser.write('DC 1,1,1024\r\n')
+            self.ser.write(b'DC 1,1,1024\r\n')
             # emitimos un mensaje que diga en que parte del proceso de scan nos encontramos
             self.message = 'Reading Curve...'
-            while self.ser.inWaiting < 4096:
-                self.emit(SIGNAL("msgsignal(Qstring)"), self.message)
-                continue
+            self.emit(SIGNAL("msgsignal(PyQt_PyObject)"), self.message)
             # leemos los datos del OMA y cerramos la conexion
-            r = self.ser.readline().rstrip('\r\n')
+            time.sleep(0.2)
+            r = self.ser.readline().decode().rstrip('\r\n')
             self.ser.close()
             # convertimos los datos(string) a ndarray para poder trabajar matematicamene y graficar los mismos
             self.espectro = fromstring(r, sep=',')

@@ -22,11 +22,13 @@ import numpy as np
 from PyQt4 import QtGui, QtCore
 from pyoma.gui.mainwindow import Ui_OMAIII
 from pyoma.instrument.oma import spectrum
+from pyoma.ploter.qtmatplotlib import cursor
 from pyoma.worker.scan import Scanner
 from pyoma.instrument.serialutil import scan_serial_ports
 
 
 class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
+
     """La ventana principal de la aplicacion."""
 
     def __init__(self):
@@ -43,10 +45,18 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
                             self.splash.showMessage
                             )
         self.setupUi(self)
+
+        self.cbx_serial_port.activated.connect(self.on_cbx_serial_port_activated)
+        self.cbx_serial_baudrates.activated.connect(self.on_cbx_serial_baudrates_activated)
+        self.cbx_serial_stopbits.activated.connect(self.on_cbx_serial_stopbits_activated)
+        self.cbx_serial_bytesizes.activated.connect(self.on_cbx_serial_bytesizes_activated)
+        self.cbx_serial_parities.activated.connect(self.on_cbx_serial_parities_activated)
         # Cargamos archivo de configuracion predeterminado
         # Estudiar caso en que el archivo de configuracion no exista
         self.config = ConfigObj('omaiii.ini')
         self.scaner = Scanner()
+        # Instanciar objeto serial
+        self.ser = serial.Serial()
 
     def connect_thread(self):
         self.emit(QtCore.SIGNAL("splashUpdate(QString, int)"),
@@ -59,7 +69,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         self.connect(self.scaner, QtCore.SIGNAL("finished()"), self.thread.quit)
         # Conectar señales y funciones
         self.connect(self.scaner, QtCore.SIGNAL("scansignal(PyQt_PyObject)"), self.incoming_data)
-        self.connect(self.scaner, QtCore.SIGNAL("msgsignal(PyQt_PyObject)"), self.change_messagge)
+        self.connect(self.scaner, QtCore.SIGNAL("msgsignal(PyQt_PyObject)"), self.update_log_monitor)
         self.connect(self.scaner, QtCore.SIGNAL("finished()"), self.update_ui)
         self.connect(self.scaner, QtCore.SIGNAL("terminated()"), self.update_ui)
         self.scaner.moveToThread(self.thread)
@@ -85,21 +95,10 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         self.emit(QtCore.SIGNAL("splashUpdate(QString, int)"),
                   'Loading conected devices . . .',
                   132)
-
         # Obtener listado de puertos serie presentes en el equipo
-        ports = scan_serial_ports(30, False)
-        self.set_ui_serial_controls(ports)
         # Acceder a la configuracion guardada
         serialConfig = self.config['serialConfig']
-        # Instanciar objeto serial
-        self.ser = serial.Serial()
 
-        if(serialConfig['port'] != '' and serialConfig['port'] in ports):
-            self.ser.port = serialConfig['port']
-            self.cbx_serial_port.setCurrentIndex(self.cbx_serial_port.findText(serialConfig['port']))
-        else:
-            self.ser.port = ports[0][1]
-            self.cbx_serial_port.setCurrentIndex(self.cbx_serial_port.findText(self.ser.name))
         if(serialConfig['baudrate'] != '' and serialConfig['baudrate'] in self.ser.BAUDRATES):
             self.ser.baudrate = serialConfig['baudrate']
             self.cbx_serial_baudrates.setCurrentIndex(self.cbx_serial_baudrates.findData(serialConfig['baudrate']))
@@ -120,15 +119,37 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             self.cbx_serial_bytesizes.setCurrentIndex(self.cbx_serial_bytesizes.findData(serialConfig['bytesize']))
         else:
             self.cbx_serial_bytesizes.setCurrentIndex(self.cbx_serial_bytesizes.findData(self.ser.bytesize))
-        self.sp_serial_timeout.setValue(int(serialConfig['timeout']))
 
-    def load_plot_settings(self):
-        self.emit(QtCore.SIGNAL("splashUpdate(QString, int)"),
-                  'Load Plot Settings . . .',
-                  132)
-        plot_config = self.config['plotSettings']
-        self.chk_show_grid_lines.setChecked(int(plot_config['grid']))
-        self.chk_show_plot_toolbar.setChecked(int(plot_config['toolbar']))
+        self.sp_serial_timeout.setValue(int(serialConfig['timeout']))
+        self.ser.timeout = self.sp_serial_timeout.value()
+
+        if serialConfig['port'] != '' and self.cbx_serial_port.findText(serialConfig['port']) > -1:
+            self.ser.port = serialConfig['port']
+            try:
+                with self.ser as s:
+                    self.update_log_monitor(str(s.port))
+                    self.update_log_monitor(str(s.get_settings()))
+                    self.cbx_serial_port.setCurrentIndex(self.cbx_serial_port.findText(serialConfig['port']))
+            except(IOError):
+                self.update_log_monitor('El puerto en el archivo de configuracion no esta disponible')
+                self.update_log_monitor(str(self.ser.SerialEcxeption()))
+                self.update_log_monitor('Seleccionando primer puerto disponible')
+                self.ser.port = self.cbx_serial_port.itemText(self.cbx_serial_port.currentIndex())
+                self.config['serialConfig']['port'] = self.ser.port
+                with self.ser as s:
+                    self.update_log_monitor(str(s.port))
+                    self.update_log_monitor(str(s.get_settings()))
+        else:
+            self.update_log_monitor('Seleccionando primer puerto disponible')
+            self.ser.port = self.cbx_serial_port.itemText(self.cbx_serial_port.currentIndex())
+            self.config['serialConfig']['port'] = self.ser.port
+            try:
+                with self.ser as s:
+                    self.update_log_monitor(str(s.port))
+                    self.update_log_monitor(str(s.get_settings()))
+            except(IOError):
+                self.update_log_monitor("La configuracion del puerto serie requiere atencion")
+                self.update_log_monitor(str(self.ser.SerialEcxeption()))
 
     def load_output_fileconfig(self):
         self.emit(QtCore.SIGNAL("splashUpdate(QString, int)"),
@@ -214,20 +235,20 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
     def on_dsb_monochromator_g3_factor_valueChanged(self):
         self.config['monochromatorConfig']['g3']['factor'] = self.dsb_monochromator_g3_factor.value()
 
-    def set_ui_serial_controls(self, ports=[]):
+    def set_ui_serial_controls(self):
 
         ''' Esta funcion es la encargada de autocompletar la informacion necesaria
         en la interfaz grafica para la configuracion de la comunicacion por puerto serie
         '''
         from serial import SerialBase
-
+        ports = scan_serial_ports(20, False)
         # Pasar listado de puertos serie disponibles a campo de seleccion en la interfaz gráfica
         for i in range(self.cbx_serial_port.count()):
             # Si hay algun item en el combobox removerlo
             self.cbx_serial_port.removeItem(i)
         for port in ports:
             # Agregar cada puerto serie disponible como item del combobox
-            self.cbx_serial_port.addItem(port[1])
+            self.cbx_serial_port.addItem(port[1], port[1])
 
         # Listar configuraciones de baudrates posibles
         for i in range(self.cbx_serial_baudrates.count()):
@@ -241,7 +262,6 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         for i in range(self.cbx_serial_parities.count()):
             # Si hay algun item en el combobox removerlo
             self.cbx_serial_parities.removeItem(i)
-
         parities_texts = {'N': 'None', 'E': 'Even', 'O': 'Odd', 'M': 'Mark', 'S': 'Space'}
         for parity in SerialBase.PARITIES:
             # Agregar configuraciones disponibles al campo de seleccion
@@ -263,48 +283,118 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             # Agregar configuraciones disponibles al campo de seleccion
             self.cbx_serial_bytesizes.addItem(str(bytesize), bytesize)
 
+    def get_cursors(self, lw):
+        items = []
+        for x in range(lw.count()):
+            items.append(lw.item(x))
+        return items
+
+    @QtCore.pyqtSlot()
+    def on_da_plot_cursors_add_pressed(self):
+        data = self.da_le_cursor.text().split(':')
+        cur = cursor()
+        cur.setText(data[0])
+        cur.x = float(data[1])
+        cur.color = data[2]
+        self.da_plot_cursors_list.addItem(cur)
+
+    @QtCore.pyqtSlot()
+    def on_daq_plot_cursor_add_pressed(self):
+        data = self.daq_le_cursor.text().split(':')
+        cur = cursor()
+        cur.setText(data[0])
+        cur.x = float(data[1])
+        cur.color = data[2]
+        self.daq_plot_cursor_list.addItem(cur)
+
+    @QtCore.pyqtSlot()
+    def on_da_plot_cursors_remove_pressed(self):
+        self.da_plot_cursors_list.takeItem(self.da_plot_cursors_list.currentRow())
+
+    @QtCore.pyqtSlot()
+    def on_daq_plot_cursor_remove_pressed(self):
+        self.daq_plot_cursor_list.takeItem(self.daq_plot_cursor_list.currentRow())
+
+    @QtCore.pyqtSlot()
+    def on_da_list_files_itemSelectionChanged(self):
+        specs = self.da_list_files.selectedItems()
+        self.da_maincanvas.axes.cla()
+        self.da_maincanvas.cursors = self.get_cursors(self.da_plot_cursors_list)
+        self.da_maincanvas.multiplot(specs, self.da_chk_subst_bkg.isChecked())
+        spec_info = ''
+        for spec in specs:
+            spec_info += spec.getSpecHeader()
+            spec_info += "\n------------------------------------------------------------\n"
+        if spec_info:
+            self.pte_da_spec_info.setPlainText(spec_info)
+
     def Plotear(self, canvas):
+        canvas.cursors = self.get_cursors(self.daq_plot_cursor_list)
         y = self.espectro.getSpec()
         canvas.axes.set_ylim(np.min(y) - np.min(y) * 20 / 100, np.max(y) + np.max(y) * 20 / 100)
-        canvas.plotoma(self.espectro)
-        self.statusBar().showMessage('Ploting...')
+        canvas.plotoma(self.espectro,
+                       False if self.sp_loop.value() != 0 else self.rb_bkg_plot.isChecked(),
+                       False if self.sp_loop.value() != 0 else self.rb_bkg_auto.isChecked())
+
+        self.update_log_monitor('Ploting...')
 
     @QtCore.pyqtSlot()
     def on_actionSave_triggered(self):
         self.espectro.toOmaFile(self.config['workspace'],
-                                self.config['fileFormat']['column_sep'],
-                                comments=self.config['fileFormat']['comment_char'],
+                                self.cbx_file_separator.itemData(self.cbx_file_separator.currentIndex()),
+                                comments=self.le_file_comment_string.text(),
                                 )
 
     @QtCore.pyqtSlot()
-    def on_cbx_serial_port_currentIndexChanged(self):
-        port = self.cbx_serial_port.itemData(self.cbx_serial_port_currentIndex())
+    def on_cbx_serial_port_activated(self):
+        index = self.cbx_serial_port.currentIndex()
+        port = self.cbx_serial_port.itemData(index)
+        print(port)
         self.config['serialConfig']['port'] = port
-        self.ser.port(port)
+        self.ser.port = port
+        with self.ser as s:
+            self.update_log_monitor(s.name)
+            self.update_log_monitor(str(s.get_settings()))
 
     @QtCore.pyqtSlot()
-    def on_cbx_serial_baudrates_currentIndexChanged(self):
-        baudrate = self.cbx_serial_baudrates.itemData(self.cbx_serial_baudrates_currentIndex())
+    def on_cbx_serial_baudrates_activated(self):
+        index = self.cbx_serial_baudrates.currentIndex()
+        baudrate = self.cbx_serial_baudrates.itemData(index)
         self.config['serialConfig']['baudrate'] = baudrate
-        self.ser.baudrate(baudrate)
+        self.ser.baudrate = baudrate
+        with self.ser as s:
+            self.update_log_monitor(s.port)
+            self.update_log_monitor(str(s.get_settings()))
 
     @QtCore.pyqtSlot()
-    def on_cbx_serial_parities_currentIndexChanged(self):
-        parity = self.cbx_serial_parities.itemData(self.cbx_serial_parities_currentIndex())
+    def on_cbx_serial_parities_activated(self):
+        index = self.cbx_serial_parities.currentIndex()
+        parity = self.cbx_serial_parities.itemData(index)
         self.config['serialConfig']['parity'] = parity
-        self.ser.parity(parity)
+        self.ser.parity = parity
+        with self.ser as s:
+            self.update_log_monitor(s.port)
+            self.update_log_monitor(str(s.get_settings()))
 
     @QtCore.pyqtSlot()
-    def on_cbx_serial_bytesizes_currentIndexChanged(self):
-        bytesize = self.cbx_serial_bytesizes.itemData(self.cbx_serial_bytesizes_currentIndex())
+    def on_cbx_serial_bytesizes_activated(self):
+        index = self.cbx_serial_bytesizes.currentIndex()
+        bytesize = self.cbx_serial_bytesizes.itemData(index)
         self.config['serialConfig']['bytesize'] = bytesize
-        self.ser.bytesize(bytesize)
+        self.ser.bytesize = bytesize
+        with self.ser as s:
+            self.update_log_monitor(s.port)
+            self.update_log_monitor(str(s.get_settings()))
 
     @QtCore.pyqtSlot()
-    def on_cbx_serial_stopbits_currentIndexChanged(self):
-        stopbits = self.cbx_serial_stopbits.itemData(self.cbx_serial_stopbits_currentIndex())
+    def on_cbx_serial_stopbits_activated(self):
+        index = self.cbx_serial_stopbits.currentIndex()
+        stopbits = self.cbx_serial_stopbits.itemData(index)
         self.config['serialConfig']['stopbits'] = stopbits
-        self.ser.stopbits(stopbits)
+        self.ser.stopbits = stopbits
+        with self.ser as s:
+            self.update_log_monitor(s.port)
+            self.update_log_monitor(str(s.get_settings()))
 
     @QtCore.pyqtSlot()
     def update_ui(self):
@@ -341,7 +431,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
 
     @QtCore.pyqtSlot()
     def on_tlb_basename_released(self):
-        #TODO: add project directory check
+
         if os.path.isdir(self.config['workspace']):
             workdir = self.config['workspace']
         else:
@@ -356,7 +446,6 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
 
     @QtCore.pyqtSlot()
     def on_tlb_fo_bkg_released(self):
-        #TODO: add project directory check
         if os.path.isdir(self.config['workspace']):
             workdir = self.config['workspace']
         else:
@@ -364,31 +453,51 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         self.le_bkg.setText(QtGui.QFileDialog.getOpenFileName(self,
                                                               directory=workdir,
                                                               caption='Open Background File',
-                                                              filter="OMA Files(*.oma)")
+                                                              filter="OMA Files(*.bkg)")
                             )
 
     def disable_controls(self):
         self.toolBox_daq.setEnabled(False)
+        self.gb_monochromator.setEnabled(False)
+
+    def enable_controls(self):
+        self.toolBox_daq.setEnabled(True)
+        self.btn_run.setText('RUN')
+        self.btn_run.setEnabled(True)
+        self.gb_monochromator.setEnabled(True)
+
+    @QtCore.pyqtSlot()
+    def update_log_monitor(self, text):
+        self.pte_daq_monitor.appendPlainText(text)
 
     @QtCore.pyqtSlot()
     def on_btn_run_pressed(self):
+
         """Proceso de Scan"""
-        self.btn_run.setEnabled(False)
-        self.disable_controls()
-        self.scaner.scan(self.ser, self.sp_loop.value())
+        if self.btn_run.text() == "RUN":
+            self.btn_run.setEnabled(False)
+            self.disable_controls()
+            self.scaner.scan(self.ser, self.sp_loop.value())
+            self.btn_run.setText('STOP')
+            self.btn_run.setEnabled(True)
+        elif self.btn_run.text() == 'STOP':
+            self.btn_run.setEnabled(False)
+            self.scaner.exiting = True
+            while self.scaner.isRunning():
+                continue
+            self.enable_controls()
 
     @QtCore.pyqtSlot()
-    def incoming_data(self, espectro):
-
-        if self.rb_background.checkState():
+    def incoming_data(self, spec):
+        self.update_log_monitor('Processing incoming data')
+        if self.rb_background.isChecked():
             spec_type = 'bkg'
         else:
             spec_type = 'spec'
 
         fname = self.le_basename.text() + time.strftime('%Y%m%d%H%M%S')
         selected_grating = self.daq_cbx_monochromator_grating.itemData(self.daq_cbx_monochromator_grating.currentIndex())
-        self.espectro.fname = fname
-        self.espectro = spectrum(y=espectro,
+        self.espectro = spectrum(y=spec,
                                  fname=fname,
                                  time=time.strftime('%c'),
                                  exptime=self.le_exposuretime.text(),
@@ -397,117 +506,131 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
                                  snumber=self.le_scansnumber.text(),
                                  iscans=self.le_ignoredscans.text(),
                                  monochromator_model='Jarrel Ash',
-                                 grating_info=self.config['monochromatorConfi'][selected_grating],
+                                 grating_info=self.config['monochromatorConfig'][selected_grating],
                                  monochromator_counter=self.config['monochromatorConfig']['counter'],
                                  spec_type=spec_type
                                  )
 
-        if self.espectro.spec_type == 'spec':
-            if self.le_bkg.text() == '':
-                #TODO: add project directory check
-                if os.path.isdir(self.config['workspace']):
-                    workdir = self.config['workspace']
-                else:
-                    workdir = os.path.expanduser('~')
-                self.le_bkg.setText(QtGui.QFileDialog.getOpenFileName(parent=self,
-                                                                      caption='Open Background File',
-                                                                      directory=workdir,
-                                                                      filter="OMA Files(*.oma)"
-                                                                      )
-                                    )
-            bkg_path = str(self.le_bkg.text())
+        if os.path.isdir(self.config['workspace']):
+            workdir = self.config['workspace']
+        else:
+            workdir = os.path.expanduser('~')
 
-            if os.path.isfile(bkg_path):
+        if spec_type == 'spec':
+            if os.path.isfile(self.le_bkg.text()):
+                bkg_path = str(self.le_bkg.text())
+                self.update_log_monitor('Adding background information')
                 self.espectro.setBackground(bkg_path)
-
-            if self.chk_autosave.checkState():
+            else:
+                if self.sp_loop.value()!=0:
+                    self.le_bkg.setText(QtGui.QFileDialog.getOpenFileName(parent=self,
+                                                                          caption='Open Background File',
+                                                                          directory=workdir,
+                                                                          filter="OMA Files(*.bkg)"
+                                                                          )
+                                        )
+    
+                    bkg_path = str(self.le_bkg.text())
+    
+                    if os.path.isfile(bkg_path):
+                        self.update_log_monitor('Adding background information')
+                        self.espectro.setBackground(bkg_path)
+                        self.update_log_monitor('Adding background information')
+                    else:
+                        self.update_log_monitor('Continue without background infomation ')
+        if self.chk_autosave.isChecked():
+            if self.sp_loop.value() != 0:
+                self.update_log_monitor('Autosave enabled. Saving data on' + self.config['workspace'])
                 self.espectro.toOmaFile(self.config['workspace'],
-                                        self.config['fileFormat']['column_sep'],
-                                        comments=self.config['fileFormat']['comment_char'],
+                                        self.cbx_file_separator.itemData(self.cbx_file_separator.currentIndex()),
+                                        comments=self.le_file_comment_string.text(),
                                         )
                 self.on_btn_check_clicked()
 
-            self.Plotear(self.espectro.y, self.daq_maincanvas)
-
-    @QtCore.pyqtSlot()
-    def on_btn_stop_clicked(self):
-        """Abortar Scan"""
-        self.scaner.exiting = True
-        self.scaner.terminate()
+        self.Plotear(self.daq_maincanvas)
+        self.load_project_oma_specs(self.config['workspace'])
+        if self.sp_loop.value() != 0:
+            self.enable_controls()
+            self.update_log_monitor('Done.')
 
     @QtCore.pyqtSlot()
     def on_btn_check_clicked(self):
         self.ser.close()
         self.ser.open()
         """Consultar Parametros de Scan"""
-        self.ser.write('ET\r\n')
-        ET = self.ser.readline().rstrip('\r\n')
-
-        if self.ser.read() == '*':
+        self.ser.write(b'ET\r\n')
+        ET = self.ser.readline().decode().rstrip('\r\n')
+        if self.ser.read() == b'*':
             self.le_exposuretime.setText(ET)
 
-        self.ser.write('DT\r\n')
-        DT = self.ser.readline().rstrip('\r\n')
+        self.ser.write(b'DT\r\n')
+        DT = self.ser.readline().decode().rstrip('\r\n')
 
-        if self.ser.read() == '*':
+        if self.ser.read() == b'*':
             self.le_detectortemp.setText(DT)
 
-        self.ser.write('DA\r\n')
-        DA = self.ser.readline().rstrip('\r\n')
+        self.ser.write(b'DA\r\n')
+        DA = self.ser.readline().decode().rstrip('\r\n')
 
-        if self.ser.read() == '*':
+        if self.ser.read() == b'*':
             self.le_damode.setText(DA)
+
+        self.ser.write(b'I\r\n')
+        I = self.ser.readline().decode().rstrip('\r\n')
+
+        if self.ser.read() == b'*':
+            self.le_scansnumber.setText(I)
 
         self.ser.close()
 
     @QtCore.pyqtSlot()
     def on_btn_update_clicked(self):
         """Update Scan Sequence Settings"""
-        self.ser.close()
         self.ser.open()
 
-        ET = 'ET ' + self.le_exposuretime.text() + '\r\n'
+        ET = 'ET ' + self.le_exposuretime.text() 
         self.config['scanSettings']['exposuretime'] = ET
-        self.ser.write(ET)
+        ET = ET + '\r\n'
+        self.ser.write(ET.encode())
 
-        if self.ser.read() == '*':
+        if self.ser.read() == b'*':
             pass
 
-        DT = 'DT ' + self.le_detectortemp.text() + '\r\n'
+        DT = 'DT ' + self.le_detectortemp.text()
         self.config['scanSettings']['detectortemp'] = DT
-        self.ser.write(DT)
-
-        if self.ser.read() == '*':
+        DT = DT + '\r\n'
+        self.ser.write(DT.encode())
+        if self.ser.read() == b'*':
             pass
-
-        DA = 'DA ' + self.le_damode.text() + '\r\n'
+        DA = 'DA ' + self.le_damode.text() 
         self.config['scanSettings']['damode'] = DA
-        self.ser.write(DA)
-
-        if self.ser.read() == '*':
+        DA = DA + '\r\n'
+        self.ser.write(DA.encode())
+        if self.ser.read() == b'*':
             pass
-
-        I = 'I ' + self.le_scansnumber.text() + '\r\n'
+        I = 'I ' + self.le_scansnumber.text()
         self.config['scanSettings']['scannumber'] = I
-
-        self.ser.write(I)
-
-        if self.ser.read() == '*':
+        I = I + '\r\n'
+        self.ser.write(I.encode())
+        if self.ser.read() == b'*':
             pass
-
-        K = 'K ' + self.le_ignoredscans.text() + '\r\n'
+        K = 'K ' + self.le_ignoredscans.text()
         self.config['scanSettings']['ignoredscans'] = K
-        self.ser.write(K)
+        K = K + '\r\n'
+        self.ser.write(K.encode())
 
-        if self.ser.read() == '*':
+        if self.ser.read() == b'*':
             pass
 
         self.btn_run.setEnabled(True)
         self.btn_update.setEnabled(False)
 
     @QtCore.pyqtSlot()
-    def on_btn_sustractbkg_pressed(self):
-        self.daq_maincanvas.plotoma(self.espectro, substract_bkg=True)
+    def on_pb_subst_bkg_pressed(self):
+        try:
+            self.daq_maincanvas.plotoma(self.espectro, substract_bkg=True)
+        except(AttributeError):
+            self.update_log_monitor("Debe tomar un espectro primero")
 
     @QtCore.pyqtSlot()
     def on_save_project_pressed(self):
@@ -529,8 +652,23 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         else:
             message = "Please select a valid omaproject directory"
             self.change_messagge(message)
+            self.update_log_monitor(message)
             self.maintabs.setTabEnabled(1, False)
             self.maintabs.setTabEnabled(2, False)
+
+    def load_project_oma_specs(self, project_path):
+
+        import glob
+        patron = project_path + os.sep + '*.oma'
+        fileList = list(filter(os.path.isfile, glob.glob(patron)))
+        fileList.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+
+        self.da_list_files.clear()
+        for file in fileList:
+            OmaListItem = spectrum()
+            OmaListItem.setText(os.path.basename(file))
+            OmaListItem.fromOmaFile(file)
+            self.da_list_files.addItem(OmaListItem)
 
     @QtCore.pyqtSlot()
     def on_load_project_pressed(self):
@@ -542,28 +680,24 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
                                                          )
         fname = dirname + '/.omaproject'
         if os.path.isfile(fname):
+            self.config['workspace'] = dirname
             self.config.filename = fname
             self.config.reload()
+            print(self.config)
+            self.load_monochromathor_config()
+            self.load_oma_scan_settings()
+            self.load_output_fileconfig()
+            self.get_serial_config()
+            self.load_project_oma_specs(dirname)
             self.maintabs.setTabEnabled(1, True)
             self.maintabs.setTabEnabled(2, True)
 
         else:
             message = "Please select a valid omaproject directory"
             self.change_messagge(message)
+            self.update_log_monitor(message)
             self.maintabs.setTabEnabled(1, False)
             self.maintabs.setTabEnabled(2, False)
-
-    def get_status(self):
-        """Obtener configuracion y estado del OMA"""
-        self.ser.close()
-        self.ser.open()
-        self.ser.write('ID\r\n')
-        status = self.ser.readline().rstrip('\r\n')
-        self.ser.read()
-        self.ser.close()
-        sys.stdout.write(status)
-        if status == 1461:
-            self.statusBar().showMessage('Ready')
 
 
 def main():
@@ -575,9 +709,7 @@ def main():
         # Do something which takes some time.
         t = time.time()
         if i == 10:
-            DAQ.get_serial_config()
-        if i == 20:
-            DAQ.load_plot_settings()
+            DAQ.set_ui_serial_controls()
         if i == 30:
             DAQ.load_oma_scan_settings()
         if i == 40:

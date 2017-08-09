@@ -5,6 +5,7 @@ Created on 1 jun. 2017
 '''
 import numpy as np
 from os import path
+from lib2to3.pytree import convert
 
 
 class OMAIII:
@@ -14,7 +15,7 @@ class OMAIII:
         pass
 
     def send(self, command_str):
-        serial_str = command_str+'\r\n'
+        serial_str = command_str + '\r\n'
         self.ser.write(serial_str)
 
     def read(self, curve_bytes):
@@ -50,29 +51,29 @@ class OMAIII:
             return error
 
     def ID(self):
-         
+
         """
         R/O
         Especifica el OMA en uso, Devuelve: 1461
         """
         pass
-         
+
     def DM(self):
-         
+
         """
         R/O
         Especifica el detector en uso, Devuelve 1462 o 1463 
         """
-     
+
     def VER(self):
-         
+
         """
         R/O
         Devuelve version del software usado por el sistema
         """
-     
+
     def CL(self):
-         
+
         """
         R/O 
         Indica el estado del cooler utilizado en el detector 
@@ -82,13 +83,13 @@ class OMAIII:
 
     def DLEN(self):
         """
-        R/O 
+        R/O
         Especifica la longitu del detector utilizado 
         """
     def ERR(self):
 
         """
-        R/O 
+        R/O
         Devuelve un codigo de error que corresponde al ultimo comando
         operado por el OMA III
         CODE                        ERROR
@@ -101,33 +102,33 @@ class OMAIII:
         """
 
     def MINET(self):
+
         """
-        
         R/O
         Devuelve el tiempo de exposicion minimo, en segundos,
         para la configuracion actual
-        
+
         """
 
     def MAXMEM(self):
-         
+
         """
         R/O
         Devuelve un numero que representa el maximo numero de memorias disponbles 
         para el almacenamiento de datos
         """
-         
+
     def ADP (self):
-         
+
         """
         R/O 
         Indica la presicion usada por el convertidor Analogo-Digital
         Devuelve: 0, si esta unstalando un convertidor de 12 bits
                   1, si esta utilizando un convertidor de 14 bits
         """
-        
+
     def DT (self, n):
-         
+
         """
         R/W
         Tempeatura del detector: si 'n' es omitido el comando devolvera la temperatura, en grados centigrados,
@@ -137,9 +138,9 @@ class OMAIII:
         Para el detector 1462 el unico valo valor admitido para 'n' es '5' cuialquier otro valor seleccionara
         el ajuste manual del sistema de enfriamiento
         """
-    
+
     def ET (self, n):
-         
+
         """
         R/W
         Tiempo de Exposición: Si 'n' es omitido el comando devolvera el tiempo, en segundos,
@@ -147,46 +148,46 @@ class OMAIII:
         Si 'n' es especificado se ajustara el tiempo de exposicion del detector al valor de 'n',
         el maximo valor admitido es 14400
         """
-    
+
     def FREQ (self, n):
-         
+
         """
         R/W
         Frecuencia de la linea electrica: Si 'n' es omitido este comando leer la frecuencia
         de la linea (50/60 Hz) para la que esta configurado el sistema.
         Si 'n' es definido [50|60] se ajustara la configuracion del sistema al valor sekeccionado
         """
-         
+
     def TRIGON (self):
-         
+
         """
         TRIG.ON
-         
+
         """
         pass
-     
+
     def TRIGOFF (self):
-         
+
         """
         TRIG.OFF
         """
         pass
-     
+
     def SYNC (self):
-         
+
         """
         Estado de sincronización
         """
-         
+
     def NS (self):
-         
+
         """
         Sincronización normal
         """
         pass
-     
+
     def LS (self):
-        
+
         """
         Sincronización con la linea
         """
@@ -236,29 +237,29 @@ class OMAIII:
         W/O
         Borra el contenido de la memoria especificada por 'n'
         """
-         
+
     def CLRALL(self):
-         
+
         """
         W/O
         Borra el contenido de todas las memorias del 1461
         """
-         
+
     def MEM (self,n):
-         
+
         """
         R/W
         Si 'n' es omitido el comando devolvera un entero como puntero que indica que memoria se esta utilizando actualmente,
         para el almacenamiento de datos
         Si se indica un valor para 'n' el comando movera el puntero a esa posicion de almacenamiento
         """
-     
+
     def ADD (self, n1, n2):
-         
+
         """
         Suma las curvas almacenadas en las memorias 'n1' y 'n2' el resultado es almacenado en 'n2'
         """
-        
+
     def SUB(self, n1, n2):
 
         """
@@ -281,7 +282,7 @@ class OMAIII:
         El valor devuelto por este comando es equivalente al de PTS() multiplicado por 2,
         o por 4 si se esta utilizando doble presición.
         """
-         
+
     def DP(self):
         """
         R/O
@@ -316,16 +317,19 @@ class OMAIII:
         Ejemplo DC(1, 1, 1024) enviara a la computadora los datos almacenados en la memoria 1, 
         desde el pixel 1 al pixel 1024
         """
-         
+
     def DD(self, n):
-        
+
         """
         Delimitador: Si 'n' es omitido el comando devolvera el caracter que esta siendo utilizado como delimitador,
         en el caso de que se 'n' tome un valor este sera seteado como nuevo delimitador entre los datos.
         """
 
 
-class spectrum(object):
+from PyQt4.QtGui import QListWidgetItem
+
+
+class spectrum(QListWidgetItem):
 
     def __init__(self,
                  x=np.arange(1, 1025, 1),
@@ -343,8 +347,8 @@ class spectrum(object):
                  monochromator_counter='',
                  spec_type='spec',
                  ):
-
-        self.spec_type=spec_type
+        QListWidgetItem.__init__(self)
+        self.spec_type = spec_type
         self.fname = fname
         self.time = time
         self.exptime = exptime
@@ -355,8 +359,7 @@ class spectrum(object):
         self.monochromator_model = monochromator_model
         self.grating_info = grating_info
         self.monochromator_counter = monochromator_counter
-        if self.type == 'spec':
-            self.bkg = bkg
+        self.bkg = bkg
         self.x = x
         self.y = y
 
@@ -395,56 +398,67 @@ class spectrum(object):
                 header.append("{key}={value}".format(key=key, value=v))
 
         return '\n'.join(header)
-    
+
     def setBackground(self, fname, sep='\t', comments='/*', headerlines=11):
         self.bkg = np.genfromtxt(fname,
                                  delimiter=sep,
                                  skip_header=headerlines,
                                  usecols=1,
                                  )
-        
+
     def getSpec(self, substract_bkg=True):
         if substract_bkg:
             return self.y - self.bkg
         else:
             return self.y
-        
+
     def toOmaFile(self,
                   path_to_save=path.expanduser('~'),
                   delimiter='\t',
                   newline='\n',
-                  comments='/*',
+                  comments='%',
                   use_header=True):
 
         ''' Save data to oma file
         '''
-
+        if self.spec_type == 'spec':
+            file_ext = '.oma'
+        else:
+            file_ext = '.bkg'
         if path.isdir(path_to_save):
-            fname = self.fname + '.oma'
+            fname = path.join(path_to_save, self.fname + file_ext)
 
         else:
-            #TODO: add validation file rutine
-            self.fname = path_to_save
-            fname = self.fname + '.oma'
+            self.fname = path.join(path.expanduser('~'), self.fname + file_ext)
 
-        if self.type == 'bkg':
-            X = np.column_stack((self.x, self.y))
-        else:
-            X = np.column_stack((self.x, self.y, self.bkg))
+        X = np.column_stack((self.x, self.y, self.bkg))
         if use_header:
             header = self.getSpecHeader()
         else:
             header = ''
-        #TODO: add error handle
+
         np.savetxt(fname, X, fmt='%10.0f', delimiter=delimiter, newline=newline, header=header, comments=comments)
 
+        fsock = open(fname, 'r', encoding='latin1')
+        file = fsock.readlines()
+        fsock.close()
+
+        fsock = open(fname, 'w', encoding='utf-8')
+        for line in file:
+            fsock.write(line)
+        fsock.close()
+
     def validateOmaSpec(self):
+
         ''' Valida oma data '''
+
         #TODO: add validation for oma settings
         pass
-    
-    def fromOmaFile(self, fname, sep='\t', comments='/*', headerlines=11):
-        ''' Load data from file'
+
+    def fromOmaFile(self, fname, sep='\t', comments='%', headerlines=11):
+
+        '''
+            Load data from file'
         '''
         f = open(fname, 'r')
         for line in f.readlines()[:headerlines]:
@@ -452,17 +466,53 @@ class spectrum(object):
             self.__setattr__(key.strip(comments), value.strip('\'\n'))
         f.close()
 
-        if self.type=='spec':
-            cols = (0,1,2)
-        elif self.type == 'bkg':
-            cols = (0,1)
+#         import ast
+#         self.grating_info = ast.literal_eval(self.grating_info)
 
-        import ast
-        self.grating_info = ast.literal_eval(self.grating_info)
+        cols = (0, 1, 2)
         self.x, self.y, self.bkg = np.genfromtxt(fname,
-                                                 delimiter=sep,
                                                  skip_header=headerlines,
                                                  usecols=cols,
-                                                 unpack=True,
+                                                 unpack=True
                                                  )
 
+
+def convert_old_oma_files(project_path):
+
+    import glob
+    import os
+    if os.path.isdir(project_path):
+        patron = project_path + os.sep + '*.OMAIII'
+        fileList = filter(os.path.isfile, glob.glob(patron))
+        for file in fileList:
+            oldheader = open(file, 'r').readlines()[:7]
+            spec = spectrum()
+            spec.fname = os.path.splitext(os.path.basename(file))[0]
+            spec.exptime = oldheader[0].strip('\n')
+            spec.snumber = oldheader[1].strip('\n')
+            spec.ignoredscans = oldheader[2].strip('\n')
+            spec.damode = oldheader[3].strip('\n')
+            spec.dtemp = oldheader[4].strip('\n')
+            spec.grating_info = [oldheader[5].strip('\n'), '', '']
+            spec.monochromator_counter = oldheader[6].strip('\n')
+
+            x, y = np.genfromtxt(file,
+                                 skip_header=7,
+                                 usecols=(0, 1),
+                                 unpack=True,
+                                )
+            spec.x = x
+            spec.y = y
+            spec.toOmaFile(project_path)
+
+    else:
+            return False
+
+
+# convert_old_oma_files('/home/javier/oma-workspace/')
+# spectro = spectrum()
+# spectro.fromOmaFile('/home/javier/oma-workspace/barridoP_0001.oma')
+# spectro.bkg=np.copy(spectro.y)
+# spectro.y=np.zeros_like(np.arange(1, 1025, 1))
+# print(spectro.getSpec())
+# spectro.toOmaFile('/home/javier/oma-workspace/')

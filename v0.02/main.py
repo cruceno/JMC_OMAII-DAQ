@@ -125,7 +125,7 @@ class Main( QtGui.QMainWindow ):
 #        self.rs232 = RS232()
         self.scaner = Scanner()
 #        self.Sort = Sort()
-        self.ser = serial.Serial( port = 'COM3',
+        self.ser = serial.Serial( port = '/dev/ttyUSB0',
                                   baudrate = 9600,
                                   parity = serial.PARITY_NONE,
                                   stopbits = 1,
@@ -399,7 +399,7 @@ class Main( QtGui.QMainWindow ):
         status = self.ser.readline().rstrip( '\r\n' )
         self.ser.read()
         self.ser.close()
-        print status
+
         if status == 1461:
             self.statusBar().showMessage( 'Ready' )
 

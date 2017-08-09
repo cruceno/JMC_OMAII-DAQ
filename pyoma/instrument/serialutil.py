@@ -14,7 +14,6 @@ def scan_serial_ports(num_ports=20, verbose=True):
         num_ports: Cantidad de puertos series a escanear
         verbose: Muestra informacion del proceso
     '''
-
     # Lista de los dispositivos serie. Inicialmente vacia
     dispositivos_serie = []
     # num_ports =100
@@ -31,7 +30,7 @@ def scan_serial_ports(num_ports=20, verbose=True):
             try:
                 # Abrir puerto serie
 
-                    s = Serial(i)
+                    s = Serial("COM%d" % i)
                     if verbose:
                         sys.stdout.write("OK --> %s\n" % s.portstr)
                     # Si no hay errores, anadir el numero y nombre a la lista
@@ -71,7 +70,7 @@ def scan_serial_ports(num_ports=20, verbose=True):
             # Si hay un error se ignore
             except:
                 if verbose:
-                    sys.stdout.write("/dev/ttyUSB: NO\n")
+                    sys.stdout.write("/dev/ttyUSB%s: NO\n" % i)
                 pass
             try:
                 # Abrir puerto serie
@@ -89,3 +88,4 @@ def scan_serial_ports(num_ports=20, verbose=True):
                 pass
     # Devolver la lista de los dispositivos serie encontrados
     return dispositivos_serie
+
