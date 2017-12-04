@@ -100,8 +100,11 @@ ENV/
 # mypy
 .mypy_cache/
 
-# Eclipse settings folder 
+# Eclipse settings folder
+org.eclipse.core.resources.prefs 
 .settings/
 /src/
 /OMAIII/
 /05- 02.09.13/
+/test_serial.py
+/pyoma_ori/

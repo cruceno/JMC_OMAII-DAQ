@@ -130,26 +130,37 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
                     self.update_log_monitor(str(s.port))
                     self.update_log_monitor(str(s.get_settings()))
                     self.cbx_serial_port.setCurrentIndex(self.cbx_serial_port.findText(serialConfig['port']))
-            except(IOError):
+            except IOError as e:
                 self.update_log_monitor('El puerto en el archivo de configuracion no esta disponible')
-                self.update_log_monitor(str(self.ser.SerialEcxeption()))
+                self.update_log_monitor(str(e))
                 self.update_log_monitor('Seleccionando primer puerto disponible')
                 self.ser.port = self.cbx_serial_port.itemText(self.cbx_serial_port.currentIndex())
                 self.config['serialConfig']['port'] = self.ser.port
-                with self.ser as s:
-                    self.update_log_monitor(str(s.port))
-                    self.update_log_monitor(str(s.get_settings()))
+                try:
+                    with self.ser as s:
+                        s.close()
+                        s.open()
+                        self.update_log_monitor(str(s.port))
+                        self.update_log_monitor(str(s.get_settings()))
+                        s.close()
+                except IOError as e:
+                    self.update_log_monitor("La configuracion del puerto serie requiere atencion")
+                    self.update_log_monitor(str(e))
         else:
             self.update_log_monitor('Seleccionando primer puerto disponible')
             self.ser.port = self.cbx_serial_port.itemText(self.cbx_serial_port.currentIndex())
             self.config['serialConfig']['port'] = self.ser.port
             try:
                 with self.ser as s:
+                    s.close()
+                    s.open()
                     self.update_log_monitor(str(s.port))
                     self.update_log_monitor(str(s.get_settings()))
-            except(IOError):
+                    s.close()
+
+            except IOError as e:
                 self.update_log_monitor("La configuracion del puerto serie requiere atencion")
-                self.update_log_monitor(str(self.ser.SerialEcxeption()))
+                self.update_log_monitor(str(e))
 
     def load_output_fileconfig(self):
         self.emit(QtCore.SIGNAL("splashUpdate(QString, int)"),
@@ -352,9 +363,16 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         print(port)
         self.config['serialConfig']['port'] = port
         self.ser.port = port
-        with self.ser as s:
-            self.update_log_monitor(s.name)
-            self.update_log_monitor(str(s.get_settings()))
+        try:
+            with self.ser as s:
+                s.close()
+                s.open()
+                self.update_log_monitor(s.name)
+                self.update_log_monitor(str(s.get_settings()))
+                s.close()
+        except IOError as e:
+            self.update_log_monitor("La configuracion del puerto serie requiere atencion")
+            self.update_log_monitor(str(e))
 
     @QtCore.pyqtSlot()
     def on_cbx_serial_baudrates_activated(self):
@@ -362,9 +380,16 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         baudrate = self.cbx_serial_baudrates.itemData(index)
         self.config['serialConfig']['baudrate'] = baudrate
         self.ser.baudrate = baudrate
-        with self.ser as s:
-            self.update_log_monitor(s.port)
-            self.update_log_monitor(str(s.get_settings()))
+        try:
+            with self.ser as s:
+                s.close()
+                s.open()
+                self.update_log_monitor(s.name)
+                self.update_log_monitor(str(s.get_settings()))
+                s.close()
+        except IOError as e:
+            self.update_log_monitor("La configuracion del puerto serie requiere atencion")
+            self.update_log_monitor(str(e))
 
     @QtCore.pyqtSlot()
     def on_cbx_serial_parities_activated(self):
@@ -372,9 +397,17 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         parity = self.cbx_serial_parities.itemData(index)
         self.config['serialConfig']['parity'] = parity
         self.ser.parity = parity
-        with self.ser as s:
-            self.update_log_monitor(s.port)
-            self.update_log_monitor(str(s.get_settings()))
+
+        try:
+            with self.ser as s:
+                s.close()
+                s.open()
+                self.update_log_monitor(s.name)
+                self.update_log_monitor(str(s.get_settings()))
+                s.close()
+        except IOError as e:
+            self.update_log_monitor("La configuracion del puerto serie requiere atencion")
+            self.update_log_monitor(str(e))
 
     @QtCore.pyqtSlot()
     def on_cbx_serial_bytesizes_activated(self):
@@ -382,9 +415,13 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         bytesize = self.cbx_serial_bytesizes.itemData(index)
         self.config['serialConfig']['bytesize'] = bytesize
         self.ser.bytesize = bytesize
-        with self.ser as s:
-            self.update_log_monitor(s.port)
-            self.update_log_monitor(str(s.get_settings()))
+        try:
+            with self.ser as s:
+                self.update_log_monitor(s.name)
+                self.update_log_monitor(str(s.get_settings()))
+        except IOError as e:
+            self.update_log_monitor("La configuracion del puerto serie requiere atencion")
+            self.update_log_monitor(str(e))
 
     @QtCore.pyqtSlot()
     def on_cbx_serial_stopbits_activated(self):
@@ -392,9 +429,13 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         stopbits = self.cbx_serial_stopbits.itemData(index)
         self.config['serialConfig']['stopbits'] = stopbits
         self.ser.stopbits = stopbits
-        with self.ser as s:
-            self.update_log_monitor(s.port)
-            self.update_log_monitor(str(s.get_settings()))
+        try:
+            with self.ser as s:
+                self.update_log_monitor(s.name)
+                self.update_log_monitor(str(s.get_settings()))
+        except IOError as e:
+            self.update_log_monitor("La configuracion del puerto serie requiere atencion")
+            self.update_log_monitor(str(e))
 
     @QtCore.pyqtSlot()
     def update_ui(self):
@@ -529,9 +570,9 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
                                                                           filter="OMA Files(*.bkg)"
                                                                           )
                                         )
-    
+
                     bkg_path = str(self.le_bkg.text())
-    
+
                     if os.path.isfile(bkg_path):
                         self.update_log_monitor('Adding background information')
                         self.espectro.setBackground(bkg_path)
@@ -555,75 +596,84 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
 
     @QtCore.pyqtSlot()
     def on_btn_check_clicked(self):
-        self.ser.close()
-        self.ser.open()
         """Consultar Parametros de Scan"""
-        self.ser.write(b'ET\r\n')
-        ET = self.ser.readline().decode().rstrip('\r\n')
-        if self.ser.read() == b'*':
-            self.le_exposuretime.setText(ET)
+        try:
+            with self.ser as s:
+                s.close()
+                s.open()
+                s.write(b'ET\r\n')
+                ET = s.readline().decode().rstrip('\r\n')
+                if s.read() == b'*':
+                    self.le_exposuretime.setText(ET)
 
-        self.ser.write(b'DT\r\n')
-        DT = self.ser.readline().decode().rstrip('\r\n')
+                s.write(b'DT\r\n')
+                DT = s.readline().decode().rstrip('\r\n')
 
-        if self.ser.read() == b'*':
-            self.le_detectortemp.setText(DT)
+                if s.read() == b'*':
+                    self.le_detectortemp.setText(DT)
 
-        self.ser.write(b'DA\r\n')
-        DA = self.ser.readline().decode().rstrip('\r\n')
+                s.write(b'DA\r\n')
+                DA = s.readline().decode().rstrip('\r\n')
 
-        if self.ser.read() == b'*':
-            self.le_damode.setText(DA)
+                if s.read() == b'*':
+                    self.le_damode.setText(DA)
 
-        self.ser.write(b'I\r\n')
-        I = self.ser.readline().decode().rstrip('\r\n')
+                s.write(b'I\r\n')
+                I = s.readline().decode().rstrip('\r\n')
 
-        if self.ser.read() == b'*':
-            self.le_scansnumber.setText(I)
+                if s.read() == b'*':
+                    self.le_scansnumber.setText(I)
+                s.close()
 
-        self.ser.close()
+        except IOError as e:
+            self.update_log_monitor("La configuracion del puerto serie requiere atencion")
+            self.update_log_monitor(str(e))
 
     @QtCore.pyqtSlot()
     def on_btn_update_clicked(self):
         """Update Scan Sequence Settings"""
-        self.ser.open()
+        try:
+            with self.ser as s:
+                s.close()
+                s.open()
+                ET = 'ET ' + self.le_exposuretime.text() 
+                self.config['scanSettings']['exposuretime'] = ET
+                ET = ET + '\r\n'
+                s.write(ET.encode())
 
-        ET = 'ET ' + self.le_exposuretime.text() 
-        self.config['scanSettings']['exposuretime'] = ET
-        ET = ET + '\r\n'
-        self.ser.write(ET.encode())
+                if s.read() == b'*':
+                    pass
 
-        if self.ser.read() == b'*':
-            pass
-
-        DT = 'DT ' + self.le_detectortemp.text()
-        self.config['scanSettings']['detectortemp'] = DT
-        DT = DT + '\r\n'
-        self.ser.write(DT.encode())
-        if self.ser.read() == b'*':
-            pass
-        DA = 'DA ' + self.le_damode.text() 
-        self.config['scanSettings']['damode'] = DA
-        DA = DA + '\r\n'
-        self.ser.write(DA.encode())
-        if self.ser.read() == b'*':
-            pass
-        I = 'I ' + self.le_scansnumber.text()
-        self.config['scanSettings']['scannumber'] = I
-        I = I + '\r\n'
-        self.ser.write(I.encode())
-        if self.ser.read() == b'*':
-            pass
-        K = 'K ' + self.le_ignoredscans.text()
-        self.config['scanSettings']['ignoredscans'] = K
-        K = K + '\r\n'
-        self.ser.write(K.encode())
-
-        if self.ser.read() == b'*':
-            pass
-
-        self.btn_run.setEnabled(True)
-        self.btn_update.setEnabled(False)
+                DT = 'DT ' + self.le_detectortemp.text()
+                self.config['scanSettings']['detectortemp'] = DT
+                DT = DT + '\r\n'
+                s.write(DT.encode())
+                if s.read() == b'*':
+                    pass
+                DA = 'DA ' + self.le_damode.text() 
+                self.config['scanSettings']['damode'] = DA
+                DA = DA + '\r\n'
+                s.write(DA.encode())
+                if s.read() == b'*':
+                    pass
+                I = 'I ' + self.le_scansnumber.text()
+                self.config['scanSettings']['scannumber'] = I
+                I = I + '\r\n'
+                s.write(I.encode())
+                if s.read() == b'*':
+                    pass
+                K = 'K ' + self.le_ignoredscans.text()
+                self.config['scanSettings']['ignoredscans'] = K
+                K = K + '\r\n'
+                s.write(K.encode())
+                if s.read() == b'*':
+                    pass
+                s.close()
+                self.btn_run.setEnabled(True)
+                self.btn_update.setEnabled(False)
+        except(IOError):
+            self.update_log_monitor("La configuracion del puerto serie requiere atencion")
+            self.update_log_monitor(str(self.ser.SerialEcxeption()))
 
     @QtCore.pyqtSlot()
     def on_pb_subst_bkg_pressed(self):
@@ -683,7 +733,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             self.config['workspace'] = dirname
             self.config.filename = fname
             self.config.reload()
-            print(self.config)
+#            print(self.config)
             self.load_monochromathor_config()
             self.load_oma_scan_settings()
             self.load_output_fileconfig()
