@@ -5,7 +5,8 @@ Created on 13 abr. 2017
 @author: javit
 '''
 
-from PyQt4.QtGui import QSplashScreen, QFontDatabase, QFont, QLabel, QProgressBar
+from PySide6.QtGui import QFontDatabase, QFont
+from PySide6.QtWidgets import QSplashScreen, QLabel, QProgressBar
 
 QFontDatabase.addApplicationFont("./fonts/EXO2REGULAR.TTF")
 
@@ -51,3 +52,4 @@ class SplashScreen(QSplashScreen):
 
     def mousePressEvent(self, event):
         pass
+

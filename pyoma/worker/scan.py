@@ -3,7 +3,7 @@ Created on 1 jun. 2017
 
 @author: javier
 '''
-from PyQt4.QtCore import QThread, SIGNAL
+from PySide6.QtCore import QThread, SIGNAL
 from numpy import fromstring
 import time
 
