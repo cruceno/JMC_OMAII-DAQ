@@ -19,31 +19,21 @@ import numpy as np
 
 # Importar backends y librerias necesarias para graficar los datos
 # Importar librerias de interfaz grafica
-from PyQt4 import QtGui, QtCore
-from pyoma.gui.mainwindow import Ui_OMAIII
+from PySide6 import QtGui, QtCore, QtWidgets
+from pyoma.gui.main_app import MainApp
 from pyoma.instrument.oma import spectrum
 from pyoma.ploter.qtmatplotlib import cursor
 from pyoma.worker.scan import Scanner
 from pyoma.instrument.serialutil import scan_serial_ports
 
 
-class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
+class OMAIIIuiAPP(QtWidgets.QMainWindow, MainApp):
 
     """La ventana principal de la aplicacion."""
 
     def __init__(self):
-        QtGui.QMainWindow.__init__(self)
+        super(OMAIIIuiAPP, self).__init__()
         # Cargamos la interfaz grafica
-        # Create a pixmap - not needed if you have your own.
-        from pyoma.gui.splash import SplashScreen
-        pixmap = QtGui.QPixmap('./gui/images/splash.png')
-        self.splash = SplashScreen(pixmap)
-        self.splash.setTitle('OMAIII DAQ')
-        self.splash.show()
-        self.splash.connect(self,
-                            QtCore.SIGNAL('splashUpdate(QString, int)'),
-                            self.splash.showMessage
-                            )
         self.setupUi(self)
 
         self.cbx_serial_port.activated.connect(self.on_cbx_serial_port_activated)
@@ -53,7 +43,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         self.cbx_serial_parities.activated.connect(self.on_cbx_serial_parities_activated)
         # Cargamos archivo de configuracion predeterminado
         # Estudiar caso en que el archivo de configuracion no exista
-        self.config = ConfigObj('omaiii.ini')
+        self.config = ConfigObj('pyoma/omaiii.ini')
         self.scaner = Scanner()
         # Instanciar objeto serial
         self.ser = serial.Serial()
@@ -194,55 +184,55 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         self.le_monochromator_g3_resolution.setText(monochromatorConfig['g3']['resolution'])
         self.dsb_monochromator_g3_factor.setValue(float(monochromatorConfig['g3']['factor']))
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_daq_sp_monochromator_counter_valueChanged(self):
         self.config['monochromatorConfig']['counter'] = self.daq_sp_monochromator_counter.value()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_monochromator_g1_lines_editingFinished(self):
         self.config['monochromatorConfig']['g1']['lines'] = self.le_monochromator_g1_lines.text()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_monochromator_g1_amplitude_editingFinished(self):
         self.config['monochromatorConfig']['g1']['amplitude'] = self.le_monochromator_g1_amplitude.text()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_monochromator_g1_resolution_editingFinished(self):
         self.config['monochromatorConfig']['g1']['resolution'] = self.le_monochromator_g1_resolution.text()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_dsb_monochromator_g1_factor_valueChanged(self):
         self.config['monochromatorConfig']['g1']['factor'] = self.dsb_monochromator_g1_factor.value()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_monochromator_g2_lines_editingFinished(self):
         self.config['monochromatorConfig']['g2']['lines'] = self.le_monochromator_g2_lines.text()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_monochromator_g2_amplitude_editingFinished(self):
         self.config['monochromatorConfig']['g2']['amplitude'] = self.le_monochromator_g2_amplitude.text()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_monochromator_g2_resolution_editingFinished(self):
         self.config['monochromatorConfig']['g2']['resolution'] = self.le_monochromator_g2_resolution.text()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_dsb_monochromator_g2_factor_valueChanged(self):
         self.config['monochromatorConfig']['g2']['factor'] = self.dsb_monochromator_g2_factor.value()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_monochromator_g3_lines_editingFinished(self):
         self.config['monochromatorConfig']['g3']['lines'] = self.le_monochromator_g3_lines.text()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_monochromator_g3_amplitude_editingFinished(self):
         self.config['monochromatorConfig']['g3']['amplitude'] = self.le_monochromator_g3_amplitude.text()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_monochromator_g3_resolution_editingFinished(self):
         self.config['monochromatorConfig']['g3']['resolution'] = self.le_monochromator_g3_resolution.text()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_dsb_monochromator_g3_factor_valueChanged(self):
         self.config['monochromatorConfig']['g3']['factor'] = self.dsb_monochromator_g3_factor.value()
 
@@ -300,7 +290,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             items.append(lw.item(x))
         return items
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_da_plot_cursors_add_pressed(self):
         data = self.da_le_cursor.text().split(':')
         cur = cursor()
@@ -309,7 +299,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         cur.color = data[2]
         self.da_plot_cursors_list.addItem(cur)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_daq_plot_cursor_add_pressed(self):
         data = self.daq_le_cursor.text().split(':')
         cur = cursor()
@@ -318,15 +308,15 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         cur.color = data[2]
         self.daq_plot_cursor_list.addItem(cur)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_da_plot_cursors_remove_pressed(self):
         self.da_plot_cursors_list.takeItem(self.da_plot_cursors_list.currentRow())
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_daq_plot_cursor_remove_pressed(self):
         self.daq_plot_cursor_list.takeItem(self.daq_plot_cursor_list.currentRow())
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_da_list_files_itemSelectionChanged(self):
         specs = self.da_list_files.selectedItems()
         self.da_maincanvas.axes.cla()
@@ -349,14 +339,14 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
 
         self.update_log_monitor('Ploting...')
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_actionSave_triggered(self):
         self.espectro.toOmaFile(self.config['workspace'],
                                 self.cbx_file_separator.itemData(self.cbx_file_separator.currentIndex()),
                                 comments=self.le_file_comment_string.text(),
                                 )
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_cbx_serial_port_activated(self):
         index = self.cbx_serial_port.currentIndex()
         port = self.cbx_serial_port.itemData(index)
@@ -374,7 +364,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             self.update_log_monitor("La configuracion del puerto serie requiere atencion")
             self.update_log_monitor(str(e))
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_cbx_serial_baudrates_activated(self):
         index = self.cbx_serial_baudrates.currentIndex()
         baudrate = self.cbx_serial_baudrates.itemData(index)
@@ -391,7 +381,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             self.update_log_monitor("La configuracion del puerto serie requiere atencion")
             self.update_log_monitor(str(e))
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_cbx_serial_parities_activated(self):
         index = self.cbx_serial_parities.currentIndex()
         parity = self.cbx_serial_parities.itemData(index)
@@ -409,7 +399,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             self.update_log_monitor("La configuracion del puerto serie requiere atencion")
             self.update_log_monitor(str(e))
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_cbx_serial_bytesizes_activated(self):
         index = self.cbx_serial_bytesizes.currentIndex()
         bytesize = self.cbx_serial_bytesizes.itemData(index)
@@ -423,7 +413,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             self.update_log_monitor("La configuracion del puerto serie requiere atencion")
             self.update_log_monitor(str(e))
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_cbx_serial_stopbits_activated(self):
         index = self.cbx_serial_stopbits.currentIndex()
         stopbits = self.cbx_serial_stopbits.itemData(index)
@@ -437,47 +427,47 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             self.update_log_monitor("La configuracion del puerto serie requiere atencion")
             self.update_log_monitor(str(e))
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def update_ui(self):
         self.btn_run.setEnabled(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def change_messagge(self, message):
         self.statusBar().showMessage(message, 5000)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_exposuretime_editingFinished(self):
         self.btn_run.setEnabled(False)
         self.btn_update.setEnabled(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_damode_editingFinished(self):
         self.btn_run.setEnabled(False)
         self.btn_update.setEnabled(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_scansnumber_editingFinished(self):
         self.btn_run.setEnabled(False)
         self.btn_update.setEnabled(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_detectortemp_editingFinished(self):
         self.btn_run.setEnabled(False)
         self.btn_update.setEnabled(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_le_ignoredscans_editingFinished(self):
         self.btn_run.setEnabled(False)
         self.btn_update.setEnabled(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_tlb_basename_released(self):
 
         if os.path.isdir(self.config['workspace']):
             workdir = self.config['workspace']
         else:
             workdir = os.path.expanduser('~')
-        fname = QtGui.QFileDialog.getSaveFileName(parent=self,
+        fname = QtWidgets.QFileDialog.getSaveFileName(parent=self,
                                                   caption='Select File Basename',
                                                   directory=workdir,
                                                   filter="OMA Files(*.oma)"
@@ -485,13 +475,13 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         if fname:
             self.le_basename.setText(fname)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_tlb_fo_bkg_released(self):
         if os.path.isdir(self.config['workspace']):
             workdir = self.config['workspace']
         else:
             workdir = os.path.expanduser('~')
-        self.le_bkg.setText(QtGui.QFileDialog.getOpenFileName(self,
+        self.le_bkg.setText(QtWidgets.QFileDialog.getOpenFileName(self,
                                                               directory=workdir,
                                                               caption='Open Background File',
                                                               filter="OMA Files(*.bkg)")
@@ -507,11 +497,11 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
         self.btn_run.setEnabled(True)
         self.gb_monochromator.setEnabled(True)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def update_log_monitor(self, text):
         self.pte_daq_monitor.appendPlainText(text)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btn_run_pressed(self):
 
         """Proceso de Scan"""
@@ -528,7 +518,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
                 continue
             self.enable_controls()
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def incoming_data(self, spec):
         self.update_log_monitor('Processing incoming data')
         if self.rb_background.isChecked():
@@ -564,7 +554,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
                 self.espectro.setBackground(bkg_path)
             else:
                 if self.sp_loop.value()!=0:
-                    self.le_bkg.setText(QtGui.QFileDialog.getOpenFileName(parent=self,
+                    self.le_bkg.setText(QtWidgets.QFileDialog.getOpenFileName(parent=self,
                                                                           caption='Open Background File',
                                                                           directory=workdir,
                                                                           filter="OMA Files(*.bkg)"
@@ -594,7 +584,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             self.enable_controls()
             self.update_log_monitor('Done.')
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btn_check_clicked(self):
         """Consultar Parametros de Scan"""
         try:
@@ -629,7 +619,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             self.update_log_monitor("La configuracion del puerto serie requiere atencion")
             self.update_log_monitor(str(e))
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_btn_update_clicked(self):
         """Update Scan Sequence Settings"""
         try:
@@ -675,20 +665,20 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             self.update_log_monitor("La configuracion del puerto serie requiere atencion")
             self.update_log_monitor(str(self.ser.SerialEcxeption()))
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_pb_subst_bkg_pressed(self):
         try:
             self.daq_maincanvas.plotoma(self.espectro, substract_bkg=True)
         except(AttributeError):
             self.update_log_monitor("Debe tomar un espectro primero")
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_save_project_pressed(self):
         workdir = os.path.expanduser('~')
-        dirname = QtGui.QFileDialog.getExistingDirectory(self,
+        dirname = QtWidgets.QFileDialog.getExistingDirectory(self,
                                                          'Select Project Folder',
                                                          workdir,
-                                                         QtGui.QFileDialog.ShowDirsOnly
+                                                         QtWidgets.QFileDialog.ShowDirsOnly
                                                          )
         if os.path.isdir(dirname):
             fname = dirname + '/.omaproject'
@@ -720,13 +710,13 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
             OmaListItem.fromOmaFile(file)
             self.da_list_files.addItem(OmaListItem)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def on_load_project_pressed(self):
         workdir = os.path.expanduser('~')
-        dirname = QtGui.QFileDialog.getExistingDirectory(self,
+        dirname = QtWidgets.QFileDialog.getExistingDirectory(self,
                                                          'Select Project Folder',
                                                          workdir,
-                                                         QtGui.QFileDialog.ShowDirsOnly
+                                                         QtWidgets.QFileDialog.ShowDirsOnly
                                                          )
         fname = dirname + '/.omaproject'
         if os.path.isfile(fname):
@@ -751,7 +741,7 @@ class OMAIIIuiAPP(QtGui.QMainWindow, Ui_OMAIII):
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     app.processEvents()
     DAQ = OMAIIIuiAPP()
     for i in range(0, 101):

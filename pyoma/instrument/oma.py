@@ -326,10 +326,11 @@ class OMAIII:
         """
 
 
-from PyQt4.QtGui import QListWidgetItem
+from PySide6 import QtWidgets
 
 
-class spectrum(QListWidgetItem):
+
+class spectrum(QtWidgets.QListWidgetItem):
 
     def __init__(self,
                  x=np.arange(1, 1025, 1),

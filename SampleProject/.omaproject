@@ -1,0 +1,70 @@
+# Archivo de configuracion para software de adquisicion de datos OMA III
+workspace = /home/javier/Proyectos/Jmc-Informatica/JMC_OMAII-DAQ/SampleProject
+# Configuracion del conextion del puerto serie
+[serialConfig]
+	port = ""
+	baudrate = 9600
+	bytesize = 8
+	stopbits = 1
+	parity = None
+	timeout = 1
+#Configuracion del monocromador
+[monochromatorConfig]
+	selected_grating = g2
+	counter = 492
+	[[g1]]
+		lines = 1200
+		amplitude = 75
+		resolution = 0.75
+		factor = 1.0
+	
+	[[g2]]
+		lines = 3600
+		amplitude = 25
+		resolution = 0.25
+		factor = 1.0
+	
+	[[g3]]
+		lines = 150
+		amplitude = 600
+		resolution = 1
+		factor = 8.0
+
+# Configuracion de formato de archivos 
+[fileFormat]
+	column_sep = Tab
+	comment_char = %
+	comments_position = Top
+	basename = omaspec
+[plotSettings]
+	# Available colors:
+	#        b: blue
+	#        g: green
+	#        r: red
+	#        c: cyan
+	#        m: magenta
+	#        y: yellow
+	#        k: black
+	#        w: white
+	line_color = b
+	# Available line styles
+	# '-' or 'solid' 	solid line
+	# '--' or 'dashed' 	dashed line
+	# '-.' or 'dashdot' 	dash-dotted line
+	# ':' or 'dotted' 	dotted line
+	line_style = -
+	line_ticknes = 1
+	grid = 1
+	toolbar = 1
+[scanSettings]
+	# exposuretime must be 3 multiple
+	exposuretime = 0.3
+	detectortemp = 0
+	damode = 4
+	ignoredscans = 0
+	scannumber = 10
+	# auto: autosubstract background
+	# plot: plot background and spectra
+	# save: only save background data
+	background_action = save
+	scansloop = 1

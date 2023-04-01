@@ -5,22 +5,21 @@ Created on 13 abr. 2017
 @author: javit
 '''
 
-from PyQt4.QtGui import QSplashScreen, QFontDatabase, QFont, QLabel, QProgressBar
+from PySide6.QtGui import QFontDatabase, QFont
+from PySide6.QtWidgets import QSplashScreen, QLabel, QProgressBar
 
 QFontDatabase.addApplicationFont("./fonts/EXO2REGULAR.TTF")
 
-
 class SplashScreen(QSplashScreen):
-    ''' Splash con logos mostrado al inicio de la aplicacion '''
 
     def __init__(self, pixmap):
         super(SplashScreen, self).__init__(pixmap)
 
-        self._title = QLabel(self)
-        self._title.setGeometry(50 * self.width() / 100,
-                                20 * self.height() / 100,
-                                50 * self.width() / 100,
-                                11 * self.height() / 100
+        self._title=QLabel(self)
+        self._title.setGeometry(50*self.width()/100,
+                                20*self.height()/100,
+                                50*self.width()/100,
+                                11*self.height()/100
                                 )
         self._title.setStyleSheet('QLabel { color : rgb(191,180,110); }')
         font = QFont('Exo 2')
@@ -36,10 +35,10 @@ class SplashScreen(QSplashScreen):
         self.setFont(font)
 
         self.progressBar = QProgressBar(self)
-        self.progressBar.setGeometry(self.width() / 10,
-                                     8 * self.height() / 10,
-                                     8 * self.width() / 10,
-                                     self.height() / 30)
+        self.progressBar.setGeometry(self.width()/10, 
+                                     8*self.height()/10,
+                                     8*self.width()/10,
+                                     self.height()/30)
 
     def setTitle(self, title):
 
@@ -50,4 +49,10 @@ class SplashScreen(QSplashScreen):
         self._title.setGeometry(x1, y1, w, h)
 
     def mousePressEvent(self, event):
+        pass
+
+    def mouseReleaseEvent(self, *args, **kwargs):
+        pass
+
+    def mouseDoubleClickEvent(self, *args, **kwargs):
         pass

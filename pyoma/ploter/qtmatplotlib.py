@@ -5,11 +5,11 @@ Created on 6 abr. 2017
 '''
 
 # Librerias para graficar en el ploter
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from matplotlib.figure import Figure
-from PyQt4.Qt import QListWidgetItem
+from PySide6.QtWidgets import QListWidgetItem
 
 
 class canvas(FigureCanvas):
