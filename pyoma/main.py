@@ -20,30 +20,20 @@ import numpy as np
 # Importar backends y librerias necesarias para graficar los datos
 # Importar librerias de interfaz grafica
 from PySide6 import QtGui, QtCore, QtWidgets
-from pyoma.gui.mainwindow import Ui_OMAIII
+from pyoma.gui.main_app import MainApp
 from pyoma.instrument.oma import spectrum
 from pyoma.ploter.qtmatplotlib import cursor
 from pyoma.worker.scan import Scanner
 from pyoma.instrument.serialutil import scan_serial_ports
 
 
-class OMAIIIuiAPP(QtWidgets.QMainWindow, Ui_OMAIII):
+class OMAIIIuiAPP(QtWidgets.QMainWindow, MainApp):
 
     """La ventana principal de la aplicacion."""
 
     def __init__(self):
-        QtWidgets.QMainWindow.__init__(self)
+        super(OMAIIIuiAPP, self).__init__()
         # Cargamos la interfaz grafica
-        # Create a pixmap - not needed if you have your own.
-        from pyoma.gui.splash import SplashScreen
-        pixmap = QtGui.QPixmap('./gui/images/splash.png')
-        self.splash = SplashScreen(pixmap)
-        self.splash.setTitle('OMAIII DAQ')
-        self.splash.show()
-        self.splash.connect(self,
-                            QtCore.SIGNAL('splashUpdate(QString, int)'),
-                            self.splash.showMessage
-                            )
         self.setupUi(self)
 
         self.cbx_serial_port.activated.connect(self.on_cbx_serial_port_activated)
@@ -477,7 +467,7 @@ class OMAIIIuiAPP(QtWidgets.QMainWindow, Ui_OMAIII):
             workdir = self.config['workspace']
         else:
             workdir = os.path.expanduser('~')
-        fname = QtGui.QFileDialog.getSaveFileName(parent=self,
+        fname = QtWidgets.QFileDialog.getSaveFileName(parent=self,
                                                   caption='Select File Basename',
                                                   directory=workdir,
                                                   filter="OMA Files(*.oma)"
@@ -491,7 +481,7 @@ class OMAIIIuiAPP(QtWidgets.QMainWindow, Ui_OMAIII):
             workdir = self.config['workspace']
         else:
             workdir = os.path.expanduser('~')
-        self.le_bkg.setText(QtGui.QFileDialog.getOpenFileName(self,
+        self.le_bkg.setText(QtWidgets.QFileDialog.getOpenFileName(self,
                                                               directory=workdir,
                                                               caption='Open Background File',
                                                               filter="OMA Files(*.bkg)")
@@ -564,7 +554,7 @@ class OMAIIIuiAPP(QtWidgets.QMainWindow, Ui_OMAIII):
                 self.espectro.setBackground(bkg_path)
             else:
                 if self.sp_loop.value()!=0:
-                    self.le_bkg.setText(QtGui.QFileDialog.getOpenFileName(parent=self,
+                    self.le_bkg.setText(QtWidgets.QFileDialog.getOpenFileName(parent=self,
                                                                           caption='Open Background File',
                                                                           directory=workdir,
                                                                           filter="OMA Files(*.bkg)"
@@ -685,10 +675,10 @@ class OMAIIIuiAPP(QtWidgets.QMainWindow, Ui_OMAIII):
     @QtCore.Slot()
     def on_save_project_pressed(self):
         workdir = os.path.expanduser('~')
-        dirname = QtGui.QFileDialog.getExistingDirectory(self,
+        dirname = QtWidgets.QFileDialog.getExistingDirectory(self,
                                                          'Select Project Folder',
                                                          workdir,
-                                                         QtGui.QFileDialog.ShowDirsOnly
+                                                         QtWidgets.QFileDialog.ShowDirsOnly
                                                          )
         if os.path.isdir(dirname):
             fname = dirname + '/.omaproject'
@@ -723,10 +713,10 @@ class OMAIIIuiAPP(QtWidgets.QMainWindow, Ui_OMAIII):
     @QtCore.Slot()
     def on_load_project_pressed(self):
         workdir = os.path.expanduser('~')
-        dirname = QtGui.QFileDialog.getExistingDirectory(self,
+        dirname = QtWidgets.QFileDialog.getExistingDirectory(self,
                                                          'Select Project Folder',
                                                          workdir,
-                                                         QtGui.QFileDialog.ShowDirsOnly
+                                                         QtWidgets.QFileDialog.ShowDirsOnly
                                                          )
         fname = dirname + '/.omaproject'
         if os.path.isfile(fname):
